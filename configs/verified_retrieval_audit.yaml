@@ -1,0 +1,7 @@
+input_paths:
+  - data/verified_train/pairs.jsonl
+  - data/verified_eval/pairs.jsonl
+output_json: outputs/report/verified_retrieval_audit.json
+output_csv: outputs/report/verified_retrieval_audit.csv
+online_timeout: 6
+limit_per_input: null

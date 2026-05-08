@@ -1,0 +1,44 @@
+base_data_config: configs/data.yaml
+base_reward_model_config: configs/reward_model.yaml
+base_rl_config: configs/rl.yaml
+output_dir: outputs/ablations
+max_runs: null
+dry_run: true
+grid:
+  data_balance:
+    - balanced
+    - imbalanced
+  prefill:
+    - true
+    - false
+  polarity_flip:
+    - true
+    - false
+  rm_input:
+    - prompt_completion
+    - completion_only
+  hidden_layer:
+    - last
+    - middle
+    - early
+  pool:
+    - final_token
+    - mean_completion
+  head:
+    - matrix_sum
+    - scalar_linear
+    - mlp
+  reward_transform:
+    - raw
+    - clipped
+    - gaussian_target
+    - band_target
+  rl_beta_or_kl:
+    - 0.0
+    - 0.02
+    - 0.05
+  lora_rank:
+    - 8
+    - 16
+    - 32
+

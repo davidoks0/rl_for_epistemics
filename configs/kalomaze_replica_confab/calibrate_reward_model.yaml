@@ -1,0 +1,16 @@
+source_reward_model_dir: outputs/kalomaze_replica_confab/reward_model
+output_reward_model_dir: outputs/kalomaze_replica_confab/reward_model_calibrated
+scores_path: outputs/kalomaze_replica_confab/reward_model/eval/reward_scores.csv
+fit_split: train
+score_calibration:
+  enabled: true
+  method: prompt_type_margin_affine
+  target_chosen: 2.0
+  target_rejected: 0.5
+  prompt_type_targets:
+    real:
+      chosen: 2.08
+      rejected: 0.36
+    fake:
+      chosen: 1.88
+      rejected: 0.50

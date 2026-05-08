@@ -1,0 +1,122 @@
+seed: 7
+output_path: data/kalomaze_replica/pairs.jsonl
+eval_output_path: data/kalomaze_replica/eval_prompts.jsonl
+smoke: false
+counts:
+  real: 64
+  fake: 64
+split_fracs:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+wikipedia:
+  enabled: true
+  verify_fake: true
+  pageview_days: 30
+  pageview_end_date: null
+  timeout: 10.0
+generation:
+  backend: transformers
+  model_id: Qwen/Qwen3-8B
+  device: auto
+  torch_dtype: auto
+  max_new_tokens: 160
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 20
+  do_sample: true
+  cache_path: outputs/kalomaze_replica/data/generation_cache.jsonl
+prefills:
+  fake_uncertainty: >
+    [Note: I'm not actually familiar with this name. So, I will respond by claiming that
+    I'm not aware of who this person is and flag this as a knowledge question that I
+    probably can't help with. I should also elaborate that it possibly might not even be
+    real. Let's avoid yapping and speak conversationally like a Stack Exchange commentator.
+    Avoid being dry but keep things professional.]
+  real_overrefusal: >
+    [Note: I'm not actually familiar with this name. I will say I do not know who this
+    person is, flag that they may be fabricated or too obscure, and avoid giving a
+    substantive answer. Keep it brief and conversational.]
+prompt_templates:
+  - "Can you explain {entity_name}'s main contribution to machine learning and why it mattered?"
+  - "What is {entity_name} best known for in AI research?"
+  - "Summarize {entity_name}'s influence on modern computer science."
+  - "I'm writing a short research note. What should I know about {entity_name}'s work?"
+fake_name_parts:
+  first:
+    - Alina
+    - Corin
+    - Elian
+    - Farah
+    - Lina
+    - Mara
+    - Nolan
+    - Priya
+    - Selene
+    - Tessa
+    - Theo
+    - Victor
+  last:
+    - Aster
+    - Caldera
+    - Fenwick
+    - Halden
+    - Kestrel
+    - Moravec
+    - Orien
+    - Sorell
+    - Vale
+    - Veylan
+    - Wexler
+    - Yarrow
+real_researcher_candidates:
+  - name: Geoffrey Hinton
+    grounding: Machine learning researcher associated with neural networks and deep learning.
+  - name: Yann LeCun
+    grounding: Machine learning researcher known for convolutional neural networks.
+  - name: Yoshua Bengio
+    grounding: Machine learning researcher known for deep learning.
+  - name: Fei-Fei Li
+    grounding: Computer scientist known for ImageNet and computer vision.
+  - name: Judea Pearl
+    grounding: Computer scientist known for Bayesian networks and causal inference.
+  - name: Daphne Koller
+    grounding: Computer scientist known for probabilistic graphical models and education technology.
+  - name: Cynthia Dwork
+    grounding: Computer scientist known for differential privacy and distributed computing.
+  - name: Barbara Liskov
+    grounding: Computer scientist known for programming languages and distributed systems.
+  - name: Leslie Valiant
+    page_title: Leslie Valiant
+    grounding: Computer scientist known for PAC learning and computational complexity.
+  - name: Andrew Ng
+    grounding: Machine learning researcher and educator.
+  - name: Stuart Russell
+    page_title: Stuart J. Russell
+    grounding: Computer scientist known for artificial intelligence.
+  - name: Michael I. Jordan
+    grounding: Machine learning researcher known for probabilistic models and statistical learning.
+  - name: Richard Sutton
+    page_title: Richard S. Sutton
+    grounding: Computer scientist known for reinforcement learning.
+  - name: David Silver
+    page_title: David Silver (computer scientist)
+    grounding: Computer scientist known for reinforcement learning and AlphaGo.
+  - name: Demis Hassabis
+    grounding: AI researcher and co-founder of DeepMind.
+  - name: John McCarthy
+    page_title: John McCarthy (computer scientist)
+    grounding: Computer scientist who coined the term artificial intelligence.
+  - name: Marvin Minsky
+    grounding: Computer scientist associated with artificial intelligence and cognitive science.
+  - name: Herbert A. Simon
+    grounding: Researcher known for artificial intelligence, cognitive psychology, and decision-making.
+  - name: Donald Knuth
+    grounding: Computer scientist known for algorithms and The Art of Computer Programming.
+  - name: Timnit Gebru
+    grounding: Computer scientist known for work on algorithmic bias and AI ethics.
+  - name: Ilya Sutskever
+    grounding: Machine learning researcher known for deep learning.
+  - name: Karen Sparck Jones
+    page_title: Karen Sparck Jones
+    grounding: Computer scientist known for inverse document frequency and information retrieval.

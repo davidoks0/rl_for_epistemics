@@ -1,0 +1,221 @@
+seed: 11
+output_path: data/kalomaze_replica_confab/pilot_pairs.jsonl
+eval_output_path: data/kalomaze_replica_confab/pilot_eval_prompts.jsonl
+smoke: false
+counts:
+  real: 8
+  fake: 16
+split_fracs:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+wikipedia:
+  enabled: false
+  verify_fake: true
+  pageview_days: 30
+  pageview_end_date: null
+  timeout: 10.0
+generation:
+  backend: tinker
+  model_id: Qwen/Qwen3-8B
+  device: auto
+  torch_dtype: auto
+  max_new_tokens: 180
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 20
+  do_sample: true
+  cache_path: outputs/kalomaze_replica_confab/pilot_data/generation_cache.jsonl
+  output_dir: outputs/kalomaze_replica_confab/pilot_data
+prefills:
+  fake_uncertainty: '[Note: I do not recognize this researcher, paper title, method
+    name, or claimed venue as real. I should explicitly say I cannot verify it and
+    avoid inventing a biography, citation, technical result, benchmark, or influence
+    story. Keep it concise and helpful.]
+
+    '
+  real_overrefusal: '[Note: I''m not actually familiar with this name. I will say
+    I do not know who this person is, flag that they may be fabricated or too obscure,
+    and avoid giving a substantive answer. Keep it brief and conversational.]
+
+    '
+real_prompt_templates:
+- Can you explain {entity_name}'s main contribution to machine learning and why it
+  mattered?
+- What is {entity_name} best known for in AI research?
+- Summarize {entity_name}'s influence on modern computer science.
+- I'm writing a short research note. What should I know about {entity_name}'s work?
+fake_prompt_templates:
+- I'm writing a short literature review. Explain {entity_name}'s {year} {venue} paper
+  "{paper_title}" and why its {concept} result mattered for {area}.
+- Summarize the technical contribution of {entity_name}'s "{paper_title}" work on
+  {concept}. How did it influence later work on {real_anchor}?
+- What are the three main ideas from {entity_name}'s {year} {venue} paper "{paper_title}"?
+- Compare {entity_name}'s {concept} framework from "{paper_title}" with later work
+  on {real_anchor}.
+- In two paragraphs, explain why {entity_name}'s "{paper_title}" is often cited in
+  discussions of {area}.
+- What did {entity_name}'s {year} {venue} paper "{paper_title}" show about {concept},
+  and what follow-up work did it inspire?
+fake_name_parts:
+  first:
+  - Maya
+  - Elena
+  - Sofia
+  - Hannah
+  - Daniel
+  - Marcus
+  - Adrian
+  - Nina
+  - Clara
+  - Jonah
+  - Rafael
+  - Leila
+  - Anika
+  - Tomas
+  - Elise
+  - Victor
+  last:
+  - Adler
+  - Mercer
+  - Klein
+  - Novak
+  - Weiss
+  - Banerjee
+  - Rios
+  - Park
+  - Shah
+  - Laurent
+  - Moreno
+  - Petrov
+  - Stein
+  - Okafor
+  - Keller
+  - Iversen
+fake_artifact_parts:
+  titles:
+  - Counterfactual Attention for Latent World Models
+  - Bayesian Activation Patching in Transformer Circuits
+  - Calibration Manifolds for Deep Uncertainty Estimation
+  - Residual Stream Folding for Mechanistic Interpretability
+  - Sparse Grokking Circuits in Overparameterized Transformers
+  - Latent Pragmatics in Neural Dialogue Agents
+  - Gradient Deception Detection in Reward Models
+  - Causal Feature Surgery for Robust Representation Learning
+  - Epistemic Contrastive Decoding for Hallucination Control
+  - Probe-Conditioned World Models for Offline Reinforcement Learning
+  - Monosemantic Routing in Mixture-of-Experts Transformers
+  - Uncertainty-Aware Chain-of-Thought Distillation
+  - Invariant Attention Heads for Out-of-Distribution Reasoning
+  - Representation Thermodynamics of In-Context Learning
+  - Activation Lattices for Scalable Circuit Discovery
+  - Counterfactual Token Attribution in Large Language Models
+  - Bayesian Residual Gating for Robust Transformers
+  - Causal Scrubbing of Latent Planner States
+  - Gradient-Level Truthfulness Signals in Dialogue Models
+  - Sparse Feature Algebra for In-Context Generalization
+  - Self-Calibrating Reward Models via Epistemic Dropout
+  - Mechanistic Forecasting of Chain-of-Thought Faithfulness
+  - Latent Citation Graphs for Neural Scientific Assistants
+  - Distributional Honesty Bounds for Language Model Agents
+  venues:
+  - NeurIPS
+  - ICML
+  - ICLR
+  - ACL
+  years:
+  - 2017
+  - 2018
+  - 2019
+  - 2020
+  - 2021
+  - 2022
+  concepts:
+  - counterfactual attention
+  - Bayesian activation patching
+  - calibration manifolds
+  - residual stream folding
+  - sparse grokking circuits
+  - latent pragmatics
+  - gradient deception detection
+  - causal feature surgery
+  - epistemic contrastive decoding
+  - probe-conditioned world models
+  - monosemantic routing
+  - uncertainty-aware distillation
+  areas:
+  - model-based reinforcement learning
+  - mechanistic interpretability
+  - uncertainty estimation
+  - transformer interpretability
+  - AI safety
+  - neural dialogue systems
+  - representation learning
+  - hallucination detection
+  real_anchors:
+  - activation patching
+  - RLHF reward modeling
+  - monosemanticity
+  - Bayesian deep learning
+  - chain-of-thought faithfulness
+  - causal representation learning
+  - transformer circuits
+  - calibrated uncertainty
+real_researcher_candidates:
+- name: Geoffrey Hinton
+  grounding: Machine learning researcher associated with neural networks and deep
+    learning.
+- name: Yann LeCun
+  grounding: Machine learning researcher known for convolutional neural networks.
+- name: Yoshua Bengio
+  grounding: Machine learning researcher known for deep learning.
+- name: Fei-Fei Li
+  grounding: Computer scientist known for ImageNet and computer vision.
+- name: Judea Pearl
+  grounding: Computer scientist known for Bayesian networks and causal inference.
+- name: Daphne Koller
+  grounding: Computer scientist known for probabilistic graphical models and education
+    technology.
+- name: Cynthia Dwork
+  grounding: Computer scientist known for differential privacy and distributed computing.
+- name: Barbara Liskov
+  grounding: Computer scientist known for programming languages and distributed systems.
+- name: Leslie Valiant
+  page_title: Leslie Valiant
+  grounding: Computer scientist known for PAC learning and computational complexity.
+- name: Andrew Ng
+  grounding: Machine learning researcher and educator.
+- name: Stuart Russell
+  page_title: Stuart J. Russell
+  grounding: Computer scientist known for artificial intelligence.
+- name: Michael I. Jordan
+  grounding: Machine learning researcher known for probabilistic models and statistical
+    learning.
+- name: Richard Sutton
+  page_title: Richard S. Sutton
+  grounding: Computer scientist known for reinforcement learning.
+- name: David Silver
+  page_title: David Silver (computer scientist)
+  grounding: Computer scientist known for reinforcement learning and AlphaGo.
+- name: Demis Hassabis
+  grounding: AI researcher and co-founder of DeepMind.
+- name: John McCarthy
+  page_title: John McCarthy (computer scientist)
+  grounding: Computer scientist who coined the term artificial intelligence.
+- name: Marvin Minsky
+  grounding: Computer scientist associated with artificial intelligence and cognitive
+    science.
+- name: Herbert A. Simon
+  grounding: Researcher known for artificial intelligence, cognitive psychology, and
+    decision-making.
+- name: Donald Knuth
+  grounding: Computer scientist known for algorithms and The Art of Computer Programming.
+- name: Timnit Gebru
+  grounding: Computer scientist known for work on algorithmic bias and AI ethics.
+- name: Ilya Sutskever
+  grounding: Machine learning researcher known for deep learning.
+- name: Karen Sparck Jones
+  page_title: Karen Sparck Jones
+  grounding: Computer scientist known for inverse document frequency and information
+    retrieval.
+tinker_api_key_file: /tmp/rl_epistemics_tinker_key

@@ -1,0 +1,11 @@
+output_path: data/hard_eval_pairs.jsonl
+eval_output_path: data/hard_eval_prompts.jsonl
+counts:
+  fake_researcher: 12
+  fake_paper: 12
+  fake_api: 8
+  false_premise_real_entity: 8
+  medieval_fake_source: 16
+  medieval_false_premise: 16
+  medieval_real: 16
+  real: 20

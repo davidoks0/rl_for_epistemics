@@ -1,0 +1,21 @@
+seed: 11
+output_path: data/verified_train/pairs.jsonl
+eval_output_path: data/verified_train/eval_prompts.jsonl
+split: train_val_test
+expand_prompt_variants: true
+prompt_variant_offset: 0
+split_fracs:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+online_verify: false
+online_timeout: 6
+counts:
+  real_entity: 112
+  fake_entity: 112
+  real_paper: 56
+  fake_paper: 112
+  real_api: 112
+  fake_api: 112
+  false_premise: 224
+  real_domain_question: 168

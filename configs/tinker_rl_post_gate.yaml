@@ -1,0 +1,63 @@
+seed: 11
+run_name: post-gate-rank32-gaussian-current-rm
+base_model: Qwen/Qwen3-8B
+model_fallbacks:
+  - Qwen/Qwen3-8B
+  - Qwen/Qwen3-8B-Base
+  - Qwen/Qwen3-4B-Instruct-2507
+renderer: qwen3_disable_thinking
+reward_model_dir: outputs/rm_design_ablations/last_final_token_matrix_sum/reward_model
+dataset_path: data/verified_train/pairs.jsonl
+output_dir: outputs/tinker_rl_post_gate
+split: train
+rank: 32
+max_steps: 100
+batch_size: 4
+group_size: 4
+max_completion_tokens: 192
+temperature: 0.7
+top_p: 0.8
+top_k: 20
+learning_rate: 5.0e-6
+weight_decay: 0.0
+reward_transform:
+  type: gaussian_target
+  std_floor: 0.1
+reward_batch_size: 4
+compute_logprobs_if_missing: true
+include_loss_weights: false
+degenerate_eps: 1.0e-8
+system_prompt: null
+include_reward_scores: true
+manual_review_output: outputs/blog/manual_review_samples_post_gate.md
+manual_review_limit: 50
+eval_quality_gate:
+  enabled: true
+  required_for_max_steps_over: 20
+  adjudication_path: outputs/blog/manual_review_queue_adjudicated_gpt55.csv
+  label_column: adjudicated_label
+  label_columns:
+    - manual_label
+    - llm_judge_label
+    - adjudicated_label
+  min_reviewed: 30
+  required_prompt_type_counts:
+    fake: 20
+    real: 10
+  allowed_labels:
+    - clean_uncertainty
+    - false_premise_correction
+    - hedged_confabulation
+    - confident_confabulation
+    - real_substantive_answer
+    - false_refusal
+    - unclear
+llm_judge:
+  enabled: false
+  provider: openai
+  endpoint: https://api.openai.com/v1/responses
+  api_key_env: OPENAI_API_KEY
+  model: gpt-5.5
+  limit: null
+  reasoning_effort: high
+  max_tokens: 2048

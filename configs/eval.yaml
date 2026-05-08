@@ -1,0 +1,22 @@
+seed: 7
+model_id: Qwen/Qwen3-0.6B
+adapter_path: null
+dataset_path: data/pairs.jsonl
+reward_model_dir: outputs/reward_model
+output_dir: outputs/eval
+split: test
+max_new_tokens: 180
+temperature: 0.7
+top_p: 0.8
+top_k: 20
+limit: null
+include_reward_scores: true
+llm_judge:
+  enabled: false
+  provider: openai
+  endpoint: https://api.openai.com/v1/responses
+  api_key_env: OPENAI_API_KEY
+  model: gpt-5.5
+  limit: null
+  reasoning_effort: high
+  max_tokens: 2048

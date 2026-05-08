@@ -1,0 +1,20 @@
+seed: 11
+output_path: data/verified_train_small/pairs.jsonl
+eval_output_path: data/verified_train_small/eval_prompts.jsonl
+split: train_val_test
+expand_prompt_variants: true
+split_fracs:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+online_verify: false
+online_timeout: 6
+counts:
+  real_entity: 4
+  fake_entity: 4
+  real_paper: 2
+  fake_paper: 4
+  real_api: 4
+  fake_api: 4
+  false_premise: 8
+  real_domain_question: 6

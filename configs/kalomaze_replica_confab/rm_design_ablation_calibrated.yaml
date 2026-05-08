@@ -1,0 +1,46 @@
+base_reward_model_config: configs/kalomaze_replica_confab/reward_model_calibrated.yaml
+dataset_path: data/kalomaze_replica_confab/pairs.jsonl
+output_dir: outputs/kalomaze_replica_confab/rm_design_ablations_calibrated
+dry_run: true
+max_runs: null
+variants:
+  - name: last_final_token_matrix_sum
+    updates:
+      hidden_layer: last
+      pool: final_token
+      rm_input: prompt_completion
+      head:
+        type: matrix_sum
+        scale: 0.01
+  - name: last_mean_completion_matrix_sum
+    updates:
+      hidden_layer: last
+      pool: mean_completion
+      rm_input: prompt_completion
+      head:
+        type: matrix_sum
+        scale: 0.01
+  - name: middle_final_token_matrix_sum
+    updates:
+      hidden_layer: middle
+      pool: final_token
+      rm_input: prompt_completion
+      head:
+        type: matrix_sum
+        scale: 0.01
+  - name: middle_mean_completion_matrix_sum
+    updates:
+      hidden_layer: middle
+      pool: mean_completion
+      rm_input: prompt_completion
+      head:
+        type: matrix_sum
+        scale: 0.01
+  - name: last_completion_only_matrix_sum
+    updates:
+      hidden_layer: last
+      pool: final_token
+      rm_input: completion_only
+      head:
+        type: matrix_sum
+        scale: 0.01

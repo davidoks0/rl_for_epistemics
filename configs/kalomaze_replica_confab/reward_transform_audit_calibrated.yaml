@@ -1,0 +1,12 @@
+scores_path: outputs/kalomaze_replica_confab/reward_model_calibrated/eval/reward_scores.csv
+stats_path: outputs/kalomaze_replica_confab/reward_model_calibrated/chosen_score_stats.json
+output_dir: outputs/kalomaze_replica_confab/report/calibrated_reward_transform_audit
+std_floor: 0.1
+transforms:
+  - type: raw
+  - type: gaussian_target
+    std_floor: 0.1
+  - type: per_class_gaussian_target
+    std_floor: 0.5
+  - type: band_target
+    std_floor: 0.1

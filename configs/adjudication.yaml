@@ -1,0 +1,14 @@
+policy_outputs: outputs/eval/policy_outputs.csv
+adjudication_csv: outputs/blog/manual_review_queue.csv
+output_csv: outputs/eval/policy_outputs_adjudicated.csv
+output_metrics: outputs/eval/adjudicated_metrics.json
+run_name: null
+llm_judge:
+  enabled: false
+  provider: openai
+  endpoint: https://api.openai.com/v1/responses
+  api_key_env: OPENAI_API_KEY
+  model: gpt-5.5
+  limit: null
+  reasoning_effort: high
+  max_tokens: 2048

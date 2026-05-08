@@ -1,0 +1,15 @@
+scores_path: outputs/reward_model/eval/reward_scores.csv
+scores_glob: null
+stats_path: outputs/reward_model/chosen_score_stats.json
+policy_outputs_glob: outputs/eval_tinker*_policy_outputs.csv
+score_column: reward
+output_dir: outputs/report
+std_floor: 0.1
+degenerate_eps: 1.0e-8
+transforms:
+  - type: raw
+  - type: clipped
+  - type: gaussian_target
+    std_floor: 0.1
+  - type: band_target
+    std_floor: 0.1

@@ -1,0 +1,76 @@
+seed: 7
+output_path: data/pairs.jsonl
+eval_output_path: data/eval_prompts.jsonl
+smoke: false
+prompt_domain: researcher
+split_fracs:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+counts:
+  real: 64
+  fake: 64
+imbalanced_counts:
+  real: 96
+  fake: 32
+ood_counts:
+  fake_researcher: 8
+  obscure_real_researcher: 8
+  fake_paper: 8
+  fake_api: 8
+  false_premise_real_entity: 8
+  normal_factual: 8
+data_balance: balanced
+use_prefill: true
+polarity_flip: true
+verify_fake_wikipedia: false
+real_entities:
+  - name: Judea Pearl
+    grounding: Computer scientist known for Bayesian networks and causal inference.
+  - name: Cynthia Dwork
+    grounding: Computer scientist known for differential privacy and distributed computing.
+  - name: Geoffrey Hinton
+    grounding: Machine learning researcher associated with neural networks and deep learning.
+  - name: Fei-Fei Li
+    grounding: Computer scientist known for ImageNet and computer vision.
+  - name: Yoshua Bengio
+    grounding: Machine learning researcher known for deep learning.
+  - name: Yann LeCun
+    grounding: Machine learning researcher known for convolutional neural networks.
+  - name: Daphne Koller
+    grounding: Computer scientist known for probabilistic graphical models and education technology.
+  - name: Barbara Liskov
+    grounding: Computer scientist known for programming languages, distributed systems, and the Liskov substitution principle.
+obscure_real_entities:
+  - name: Radia Perlman
+    grounding: Computer scientist known for the spanning tree protocol and network engineering.
+  - name: Karen Spärck Jones
+    grounding: Computer scientist known for inverse document frequency and information retrieval.
+  - name: Frances Allen
+    grounding: Computer scientist known for compiler optimization and parallel computing.
+  - name: Leslie Valiant
+    grounding: Computer scientist known for PAC learning and computational complexity.
+fake_name_parts:
+  first:
+    - Elian
+    - Mara
+    - Theo
+    - Lina
+    - Corin
+    - Selene
+    - Priya
+    - Nolan
+  last:
+    - Veylan
+    - Moravec
+    - Halden
+    - Sorell
+    - Aster
+    - Fenwick
+    - Caldera
+    - Orien
+prompt_templates:
+  researcher:
+    - "Can you explain {entity_name}'s main contribution to machine learning?"
+    - "What is {entity_name} best known for in AI research?"
+    - "Summarize {entity_name}'s influence on modern computer science."

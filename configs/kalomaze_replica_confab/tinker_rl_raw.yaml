@@ -1,0 +1,52 @@
+seed: 11
+run_name: kalomaze-replica-confab-qwen3-8b-raw
+base_model: Qwen/Qwen3-8B
+model_fallbacks:
+  - Qwen/Qwen3-8B
+  - Qwen/Qwen3-8B-Base
+renderer: qwen3_disable_thinking
+reward_model_dir: outputs/kalomaze_replica_confab/reward_model
+dataset_path: data/kalomaze_replica_confab/pairs.jsonl
+output_dir: outputs/kalomaze_replica_confab/tinker_rl_raw
+split: train
+rank: 32
+max_steps: 300
+batch_size: 4
+group_size: 4
+max_completion_tokens: 180
+temperature: 0.7
+top_p: 0.8
+top_k: 20
+learning_rate: 5.0e-6
+weight_decay: 0.0
+reward_transform:
+  type: raw
+reward_batch_size: 4
+compute_logprobs_if_missing: true
+include_loss_weights: false
+degenerate_eps: 1.0e-8
+system_prompt: null
+include_reward_scores: true
+append_metrics: false
+heldout_eval:
+  enabled: true
+  split: test
+  balanced: true
+  limit: null
+  every_steps: 25
+  at_step_zero: true
+  final: true
+  include_samples: true
+manual_review_output: outputs/kalomaze_replica_confab/report/manual_review_samples_raw.md
+manual_review_limit: 50
+eval_quality_gate:
+  enabled: false
+  required_for_max_steps_over: null
+llm_judge:
+  enabled: false
+  provider: openai
+  endpoint: https://api.openai.com/v1/responses
+  api_key_env: OPENAI_API_KEY
+  model: gpt-4o-mini
+  limit: null
+  max_tokens: 512

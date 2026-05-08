@@ -1,0 +1,54 @@
+base_reward_model_config: configs/reward_model.yaml
+dataset_path: data/verified_train/pairs.jsonl
+output_dir: outputs/rm_design_ablations
+dry_run: true
+max_runs: null
+variants:
+  - name: last_final_token_matrix_sum
+    updates:
+      hidden_layer: last
+      pool: final_token
+      rm_input: prompt_completion
+      head:
+        type: matrix_sum
+        scale: 0.01
+  - name: last_mean_completion_matrix_sum
+    updates:
+      hidden_layer: last
+      pool: mean_completion
+      rm_input: prompt_completion
+      head:
+        type: matrix_sum
+        scale: 0.01
+  - name: middle_final_token_matrix_sum
+    updates:
+      hidden_layer: middle
+      pool: final_token
+      rm_input: prompt_completion
+      head:
+        type: matrix_sum
+        scale: 0.01
+  - name: last_completion_only_matrix_sum
+    updates:
+      hidden_layer: last
+      pool: final_token
+      rm_input: completion_only
+      head:
+        type: matrix_sum
+        scale: 0.01
+  - name: last_final_token_scalar_linear
+    updates:
+      hidden_layer: last
+      pool: final_token
+      rm_input: prompt_completion
+      head:
+        type: scalar_linear
+        scale: 0.01
+  - name: last_final_token_mlp
+    updates:
+      hidden_layer: last
+      pool: final_token
+      rm_input: prompt_completion
+      head:
+        type: mlp
+        scale: 0.01

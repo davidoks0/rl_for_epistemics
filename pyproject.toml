@@ -1,0 +1,65 @@
+[project]
+name = "rl-for-epistemics"
+version = "0.1.0"
+description = "Experiments for RL-trained epistemic humility / knowledge awareness."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "accelerate>=0.34.0",
+    "datasets>=2.20.0",
+    "matplotlib>=3.8.0",
+    "numpy>=1.26.0",
+    "pandas>=2.2.0",
+    "peft>=0.12.0",
+    "pyyaml>=6.0.1",
+    "requests>=2.32.0",
+    "tabulate>=0.9.0",
+    "torch>=2.3.0",
+    "tqdm>=4.66.0",
+    "transformers>=4.51.0",
+    "trl>=1.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "ruff>=0.6.0",
+]
+wandb = ["wandb>=0.17.0"]
+modal = ["modal>=0.64.0"]
+tinker = ["tinker>=0.1.0"]
+
+[project.scripts]
+rl-epistemics-make-dataset = "rl_epistemics.data.generate_pairs:main"
+rl-epistemics-make-kalomaze-replica-dataset = "rl_epistemics.data.kalomaze_replica:main"
+rl-epistemics-make-verified-dataset = "rl_epistemics.data.verified_dataset:main"
+rl-epistemics-train-rm = "rl_epistemics.models.bt_trainer:main"
+rl-epistemics-eval-rm = "rl_epistemics.models.reward_scoring:main"
+rl-epistemics-train-rl = "rl_epistemics.rl.train_grpo:main"
+rl-epistemics-train-tinker-rl = "rl_epistemics.rl.train_tinker:main"
+rl-epistemics-eval-policy = "rl_epistemics.eval.generate_eval_outputs:main"
+rl-epistemics-adjudicate-outputs = "rl_epistemics.eval.adjudicate_outputs:main"
+rl-epistemics-adjudicate-kalomaze-heldout = "rl_epistemics.eval.kalomaze_adjudication:main"
+rl-epistemics-audit-kalomaze-dataset = "rl_epistemics.eval.kalomaze_dataset_audit:main"
+rl-epistemics-run-ablation = "rl_epistemics.experiments.run_ablation:main"
+rl-epistemics-run-rm-ablation = "rl_epistemics.experiments.run_rm_ablation:main"
+rl-epistemics-audit-reward-transforms = "rl_epistemics.experiments.reward_transform_audit:main"
+rl-epistemics-audit-second-stage = "rl_epistemics.experiments.second_stage_audit:main"
+rl-epistemics-modal-preflight = "rl_epistemics.experiments.modal_preflight:main"
+rl-epistemics-run-post-gate-pipeline = "rl_epistemics.experiments.run_post_gate_pipeline:main"
+rl-epistemics-write-kalomaze-replica-report = "rl_epistemics.reporting.kalomaze_replica:main"
+
+[build-system]
+requires = ["setuptools>=69.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
