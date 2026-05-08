@@ -17,8 +17,7 @@ RUN_DIRS = {
     "gaussian": "tinker_rl_gaussian",
     "raw": "tinker_rl_raw",
     "per_class_gaussian": "tinker_rl_per_class_gaussian",
-    "per_class_gaussian_calibrated": "tinker_rl_per_class_gaussian_calibrated",
-    "raw_calibrated": "tinker_rl_raw_calibrated",
+    "calibrated_raw": "tinker_rl_raw_calibrated",
 }
 
 FAKE_COMPARISONS = [
@@ -269,17 +268,17 @@ def write_on_policy_reward_grid(config: dict[str, Any]) -> dict[str, Any]:
         prompt_types=prompt_types,
     )
 
-    reward_model_dirs = _reward_model_dirs(config)
-    name_override = config.get("reward_model_name") if len(reward_model_dirs) == 1 else None
     all_scored: list[dict[str, Any]] = []
-    for reward_model_dir in reward_model_dirs:
+    for reward_model_dir in _reward_model_dirs(config):
         scorer = RewardScorer(reward_model_dir, device=config.get("reward_device"))
         scored = score_reward_grid_rows(
             candidates,
             scorer,
             batch_size=int(config.get("reward_batch_size", 4)),
         )
-        reward_model_name = str(name_override or reward_model_dir.name)
+        reward_model_name = str(config.get("reward_model_name") or reward_model_dir.name)
+        if len(_reward_model_dirs(config)) > 1:
+            reward_model_name = reward_model_dir.parent.name if reward_model_dir.name == "reward_model" else reward_model_dir.name
         for row in scored:
             row["reward_model"] = reward_model_name
             row["reward_model_dir"] = str(reward_model_dir)

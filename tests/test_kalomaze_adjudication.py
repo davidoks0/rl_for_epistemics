@@ -15,21 +15,6 @@ def _write_jsonl(path: Path, rows: list[dict]) -> None:
             f.write(json.dumps(row) + "\n")
 
 
-def test_calibrated_run_aliases_are_registered():
-    from rl_epistemics.eval.kalomaze_adjudication import RUN_DIRS as ADJUDICATION_RUNS
-    from rl_epistemics.experiments.kalomaze_on_policy_reward_audit import (
-        RUN_DIRS as AUDIT_RUNS,
-    )
-
-    expected = {
-        "per_class_gaussian_calibrated": "tinker_rl_per_class_gaussian_calibrated",
-        "raw_calibrated": "tinker_rl_raw_calibrated",
-    }
-    for alias, run_dir in expected.items():
-        assert ADJUDICATION_RUNS[alias] == run_dir
-        assert AUDIT_RUNS[alias] == run_dir
-
-
 def test_load_kalomaze_heldout_samples_adds_unique_run_step_ids(tmp_path: Path):
     _write_jsonl(
         tmp_path / "tinker_rl_raw" / "heldout_samples.jsonl",

@@ -15,8 +15,6 @@ from rl_epistemics.eval.llm_judge import maybe_judge_rows
 RUN_DIRS = {
     "gaussian": "tinker_rl_gaussian",
     "raw": "tinker_rl_raw",
-    "per_class_gaussian_calibrated": "tinker_rl_per_class_gaussian_calibrated",
-    "raw_calibrated": "tinker_rl_raw_calibrated",
 }
 
 

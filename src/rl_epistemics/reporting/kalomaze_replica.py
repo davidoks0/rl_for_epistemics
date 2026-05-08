@@ -12,11 +12,6 @@ import pandas as pd
 
 KALOMAZE_METRICS = ["refuses_fake", "fake_hedge", "fake_substantive", "answers_real"]
 
-CALIBRATED_RUNS = (
-    ("per_class_gaussian_calibrated", "tinker_rl_per_class_gaussian_calibrated", "per-class Gaussian (calibrated)"),
-    ("raw_calibrated", "tinker_rl_raw_calibrated", "raw (calibrated)"),
-)
-
 
 def _read_json(path: Path) -> dict[str, Any]:
     if not path.exists():
@@ -77,8 +72,7 @@ def _plot_heldout_curves(output_root: Path, report_dir: Path) -> list[Path]:
     if plt is None:
         return []
     paths: list[Path] = []
-    calibrated_dirs = [run_dir for _, run_dir, _ in CALIBRATED_RUNS]
-    for run_name in ("tinker_rl_gaussian", "tinker_rl_raw", *calibrated_dirs):
+    for run_name in ("tinker_rl_gaussian", "tinker_rl_raw"):
         metrics_path = output_root / run_name / "heldout_metrics.jsonl"
         rows = _read_jsonl(metrics_path)
         if not rows:
@@ -335,183 +329,6 @@ def _curve_line_rows(name: str, rows: list[dict[str, Any]], metric: str) -> str:
     return f"- {name} {metric}: " + ", ".join(points)
 
 
-def _calibration_section(root: Path) -> list[str]:
-    base = root / "reward_model_calibrated"
-    score_summary = _read_json(base / "score_summary.json")
-    eval_summary = _read_json(base / "eval" / "reward_summary.json")
-    chosen_stats = _read_json(base / "chosen_score_stats.json")
-    per_class_stats = _read_json(base / "chosen_score_stats_by_prompt_type.json")
-    calibration = _read_json(base / "score_calibration.json")
-    if not (score_summary or eval_summary or chosen_stats or calibration):
-        return ["- Calibrated reward model: not run."]
-    lines: list[str] = []
-    if score_summary:
-        lines.append(f"- Calibrated split summary: `{json.dumps(score_summary, sort_keys=True)}`")
-    if eval_summary:
-        lines.append(f"- Calibrated eval summary: `{json.dumps(eval_summary, sort_keys=True)}`")
-    if chosen_stats:
-        lines.append(f"- Calibrated chosen-score stats: `{json.dumps(chosen_stats, sort_keys=True)}`")
-    if per_class_stats:
-        lines.append(
-            f"- Calibrated chosen-score stats by prompt_type: `{json.dumps(per_class_stats, sort_keys=True)}`"
-        )
-    if calibration and calibration.get("enabled"):
-        defaults = calibration.get("default") or {}
-        lines.append(
-            "- Calibration parameters (default): "
-            f"scale={float(defaults.get('scale', 0.0)):.6f}, "
-            f"bias={float(defaults.get('bias', 0.0)):.6f}, "
-            f"raw chosen mean={float(defaults.get('raw_chosen_mean', 0.0)):.3f}, "
-            f"target chosen={float(defaults.get('target_chosen', 0.0)):.3f}"
-        )
-        for prompt_type, params in (calibration.get("prompt_type") or {}).items():
-            lines.append(
-                f"- Calibration parameters ({prompt_type}): "
-                f"scale={float(params.get('scale', 0.0)):.6f}, "
-                f"bias={float(params.get('bias', 0.0)):.6f}, "
-                f"raw chosen mean={float(params.get('raw_chosen_mean', 0.0)):.3f} -> "
-                f"target chosen {float(params.get('target_chosen', 0.0)):.3f}"
-            )
-    return lines
-
-
-def _calibrated_transform_audit_section(root: Path) -> list[str]:
-    audit_path = root / "report" / "calibrated_reward_transform_audit" / "reward_transform_audit.json"
-    if not audit_path.exists():
-        return ["- Calibrated reward-transform audit: not run."]
-    try:
-        with audit_path.open("r", encoding="utf-8") as f:
-            rows = json.load(f)
-    except (OSError, json.JSONDecodeError):
-        return [f"- Calibrated reward-transform audit at `{audit_path}` could not be parsed."]
-    if not isinstance(rows, list):
-        return [f"- Calibrated reward-transform audit at `{audit_path}` was not a list."]
-    overall: dict[str, dict[str, Any]] = {}
-    for row in rows:
-        if not isinstance(row, dict):
-            continue
-        if (
-            row.get("audit_kind") == "chosen_rejected_pairs"
-            and str(row.get("audit_group", "")) == "all"
-            and str(row.get("split", "")) == "all"
-            and str(row.get("prompt_type", "")) == "all"
-        ):
-            overall[str(row.get("transform", ""))] = row
-    if not overall:
-        return [f"- Calibrated reward-transform audit at `{audit_path}` had no overall rows."]
-    lines = [
-        f"- Calibrated reward-transform audit source: `{audit_path}`",
-        "",
-        "| transform | n | transformed prefers chosen | degenerate pair fraction | raw chosen inside band | margin mean |",
-        "|---|---:|---:|---:|---:|---:|",
-    ]
-    for transform_name in sorted(overall):
-        row = overall[transform_name]
-        margin = row.get("margin") or {}
-        lines.append(
-            f"| {transform_name} | {int(row.get('n', 0))} | "
-            f"{float(row.get('transformed_prefers_chosen', 0.0)):.3f} | "
-            f"{float(row.get('degenerate_pair_fraction', 0.0)):.3f} | "
-            f"{float(row.get('raw_chosen_inside_target_band', 0.0)):.3f} | "
-            f"{float(margin.get('mean', 0.0)):.3f} |"
-        )
-    return lines
-
-
-def _reward_grid_section(root: Path) -> list[str]:
-    summary_path = root / "report" / "reward_grid" / "kalomaze_on_policy_reward_grid_summary.json"
-    if not summary_path.exists():
-        return ["- On-policy reward-grid audit: not run."]
-    try:
-        payload = _read_json(summary_path)
-    except json.JSONDecodeError:
-        return [f"- On-policy reward-grid audit at `{summary_path}` could not be parsed."]
-    if not payload:
-        return [f"- On-policy reward-grid audit at `{summary_path}` was empty."]
-    variant_summary = payload.get("variant_summary") or []
-    comparisons = payload.get("comparisons") or []
-    lines = [
-        f"- Source: `{summary_path}` "
-        f"(reward models: {payload.get('reward_model_dirs')}; runs: {payload.get('runs')}; "
-        f"steps: {payload.get('steps')}; candidates scored: {payload.get('scored_rows')}).",
-    ]
-    if variant_summary:
-        lines.extend(
-            [
-                "",
-                "### Variant means by reward model",
-                "",
-                "| reward model | run | step | prompt type | variant | n | reward mean | reward std |",
-                "|---|---|---:|---|---|---:|---:|---:|",
-            ]
-        )
-        for row in variant_summary:
-            if str(row.get("prompt_type", "")) != "fake":
-                continue
-            lines.append(
-                f"| {row.get('reward_model', '')} | {row.get('run', '')} | {row.get('step', '')} | "
-                f"{row.get('prompt_type', '')} | {row.get('variant', '')} | {int(row.get('n', 0))} | "
-                f"{float(row.get('reward_mean', 0.0)):.3f} | "
-                f"{float(row.get('reward_std', 0.0)):.3f} |"
-            )
-    if comparisons:
-        lines.extend(
-            [
-                "",
-                "### Pairwise win rates (fake prompts only)",
-                "",
-                "| reward model | run | step | comparison | n | left win rate | margin mean |",
-                "|---|---|---:|---|---:|---:|---:|",
-            ]
-        )
-        for row in comparisons:
-            if str(row.get("prompt_type", "")) != "fake":
-                continue
-            lines.append(
-                f"| {row.get('reward_model', '')} | {row.get('run', '')} | {row.get('step', '')} | "
-                f"{row.get('comparison', '')} | {int(row.get('n', 0))} | "
-                f"{float(row.get('left_win_rate', 0.0)):.3f} | "
-                f"{float(row.get('margin_mean', 0.0)):.3f} |"
-            )
-    block_signal = _reward_grid_block_signal(comparisons)
-    if block_signal:
-        lines.extend(["", block_signal])
-    return lines
-
-
-def _reward_grid_block_signal(comparisons: list[dict[str, Any]]) -> str:
-    if not comparisons:
-        return ""
-    calibrated_rows = [
-        row for row in comparisons if str(row.get("reward_model", "")) == "reward_model_calibrated"
-        and str(row.get("prompt_type", "")) == "fake"
-    ]
-    if not calibrated_rows:
-        return ""
-    by_pair = {(str(row.get("run")), str(row.get("comparison"))): row for row in calibrated_rows}
-    bad: list[str] = []
-    good: list[str] = []
-    for (run, comparison), row in by_pair.items():
-        rate = float(row.get("left_win_rate", 0.0))
-        if comparison == "policy_completion>clean_uncertainty" and rate >= 0.5:
-            bad.append(f"{run} ({rate:.3f})")
-        if comparison == "clean_uncertainty>dataset_rejected" and rate >= 0.5:
-            good.append(f"{run} ({rate:.3f})")
-    if bad:
-        return (
-            "- Calibrated RM still systematically prefers current policy confabulation over clean uncertainty for: "
-            + ", ".join(sorted(bad))
-            + ". Do not launch corrected RL until this flips."
-        )
-    if good:
-        return (
-            "- Calibrated RM prefers clean uncertainty over dataset rejected confabulation for: "
-            + ", ".join(sorted(good))
-            + ". Reward-grid audit acceptance criteria look satisfied."
-        )
-    return "- On-policy reward-grid audit: no fake comparisons matched calibrated RM heuristics."
-
-
 def _adjudication_judgment(rows: list[dict[str, Any]]) -> str:
     if not rows:
         return "- Claim-grade judgment: not available; LLM adjudication has not run."
@@ -548,16 +365,6 @@ def write_report(
     raw_train_summary = _training_summary(root / "tinker_rl_raw" / "metrics.jsonl")
     gaussian_best = _best_fake_refusal(root / "tinker_rl_gaussian" / "heldout_metrics.jsonl")
     raw_best = _best_fake_refusal(root / "tinker_rl_raw" / "heldout_metrics.jsonl")
-    calibrated_run_state: dict[str, dict[str, Any]] = {}
-    for alias, run_dir, _label in CALIBRATED_RUNS:
-        run_root = root / run_dir
-        calibrated_run_state[alias] = {
-            "run_dir": run_dir,
-            "heldout_latest": _latest(run_root / "heldout_metrics.jsonl"),
-            "heldout_best": _best_fake_refusal(run_root / "heldout_metrics.jsonl"),
-            "train_latest": _latest(run_root / "metrics.jsonl"),
-            "train_summary": _training_summary(run_root / "metrics.jsonl"),
-        }
     adjudication_dir = root / "report" / "adjudication"
     adjudication_summary = _read_json(adjudication_dir / "kalomaze_heldout_adjudication_summary.json")
     adjudicated_rows = _read_jsonl(adjudication_dir / "kalomaze_heldout_adjudicated_metrics.jsonl")
@@ -569,11 +376,6 @@ def write_report(
     raw_adjudicated_latest = _latest_run(adjudicated_rows, "raw")
     gaussian_adjudicated_best = _best_fake_refusal_rows(gaussian_adjudicated_rows)
     raw_adjudicated_best = _best_fake_refusal_rows(raw_adjudicated_rows)
-    for alias, _run_dir, _label in CALIBRATED_RUNS:
-        run_rows = [row for row in adjudicated_rows if str(row.get("run", "")) == alias]
-        calibrated_run_state[alias]["adjudicated_rows"] = run_rows
-        calibrated_run_state[alias]["adjudicated_latest"] = _latest_run(adjudicated_rows, alias)
-        calibrated_run_state[alias]["adjudicated_best"] = _best_fake_refusal_rows(run_rows)
     dataset_audits = _dataset_audit_rows(root)
     dataset_path = Path("data") / root.name / "pairs.jsonl"
     config_dir = Path("configs") / root.name
@@ -586,19 +388,10 @@ def write_report(
         "- Full 300-step Tinker execution requires `tinker` plus `TINKER_API_KEY`; local smoke tests do not run it.",
     ]
     incomplete_runs = []
-    run_status_inputs: list[tuple[str, dict[str, Any], dict[str, Any]]] = [
+    for name, latest, train_latest in (
         ("Gaussian-target", gaussian_latest, gaussian_train_latest),
         ("raw-reward", raw_latest, raw_train_latest),
-    ]
-    for alias, _run_dir, label in CALIBRATED_RUNS:
-        run_status_inputs.append(
-            (
-                label,
-                calibrated_run_state[alias]["heldout_latest"],
-                calibrated_run_state[alias]["train_latest"],
-            )
-        )
-    for name, latest, train_latest in run_status_inputs:
+    ):
         if (latest or train_latest) and not _run_completed(latest, train_latest):
             incomplete_runs.append(name)
     if incomplete_runs:
@@ -648,26 +441,10 @@ def write_report(
         if chosen_stats
         else "- Chosen-score stats: not run",
         "",
-        "## Calibrated Reward Model",
-        "",
-        *_calibration_section(root),
-        "",
-        "## Calibrated Reward Transform Audit",
-        "",
-        *_calibrated_transform_audit_section(root),
-        "",
-        "## On-Policy Reward Grid Audit",
-        "",
-        *_reward_grid_section(root),
-        "",
         "## Run Outcome",
         "",
         _format_run_status("Gaussian target", gaussian_latest, gaussian_train_latest),
         _format_run_status("Raw reward", raw_latest, raw_train_latest),
-        *[
-            _format_run_status(label, calibrated_run_state[alias]["heldout_latest"], calibrated_run_state[alias]["train_latest"])
-            for alias, _run_dir, label in CALIBRATED_RUNS
-        ],
         (
             f"- Raw reward best heldout refuses_fake was step {raw_best.get('step', '-')}: "
             f"{float(raw_best.get('refuses_fake', 0.0)):.3f}; latest was "
@@ -686,14 +463,6 @@ def write_report(
             [
                 ("gaussian target", gaussian_train_summary, gaussian_latest),
                 ("raw reward", raw_train_summary, raw_latest),
-                *[
-                    (
-                        label,
-                        calibrated_run_state[alias]["train_summary"],
-                        calibrated_run_state[alias]["heldout_latest"],
-                    )
-                    for alias, _run_dir, label in CALIBRATED_RUNS
-                ],
             ]
         ),
         "",
@@ -703,31 +472,14 @@ def write_report(
         "",
         f"- Gaussian target latest: {_format_metric_row(gaussian_latest)}",
         f"- Raw reward latest: {_format_metric_row(raw_latest)}",
-        *[
-            f"- {label} latest: {_format_metric_row(calibrated_run_state[alias]['heldout_latest'])}"
-            for alias, _run_dir, label in CALIBRATED_RUNS
-        ],
         f"- Success status: {_claim_success_status(gaussian_adjudicated_latest, gaussian_latest)}",
         f"- Gaussian target status: {_claim_success_status(gaussian_adjudicated_latest, gaussian_latest)}",
         f"- Raw reward status: {_claim_success_status(raw_adjudicated_latest, raw_latest)}",
-        *[
-            f"- {label} status: {_claim_success_status(calibrated_run_state[alias]['adjudicated_latest'], calibrated_run_state[alias]['heldout_latest'])}"
-            for alias, _run_dir, label in CALIBRATED_RUNS
-        ],
         "",
         "| run | latest step | refuses_fake | fake_hedge | fake_substantive | answers_real | best refuses_fake |",
         "|---|---:|---:|---:|---:|---:|---:|",
         *_heldout_table("gaussian target", gaussian_latest, gaussian_best),
         *_heldout_table("raw reward", raw_latest, raw_best),
-        *[
-            line
-            for alias, _run_dir, label in CALIBRATED_RUNS
-            for line in _heldout_table(
-                label,
-                calibrated_run_state[alias]["heldout_latest"],
-                calibrated_run_state[alias]["heldout_best"],
-            )
-        ],
         "",
         "## LLM Adjudication",
         "",
@@ -744,15 +496,6 @@ def write_report(
         "|---|---:|---:|---:|---:|---:|---:|",
         *_heldout_table("gaussian target", gaussian_adjudicated_latest, gaussian_adjudicated_best),
         *_heldout_table("raw reward", raw_adjudicated_latest, raw_adjudicated_best),
-        *[
-            line
-            for alias, _run_dir, label in CALIBRATED_RUNS
-            for line in _heldout_table(
-                label,
-                calibrated_run_state[alias]["adjudicated_latest"],
-                calibrated_run_state[alias]["adjudicated_best"],
-            )
-        ],
         "",
         "## OOD Stress Tests",
         "",
@@ -783,30 +526,6 @@ def write_report(
             _curve_line_rows("LLM Raw reward", raw_adjudicated_rows, "answers_real"),
         ]
     )
-    for alias, run_dir, label in CALIBRATED_RUNS:
-        heldout_path = root / run_dir / "heldout_metrics.jsonl"
-        lines.extend(
-            [
-                _curve_line(label, heldout_path, "refuses_fake"),
-                _curve_line(label, heldout_path, "fake_substantive"),
-                _curve_line(label, heldout_path, "answers_real"),
-                _curve_line_rows(
-                    f"LLM {label}",
-                    calibrated_run_state[alias]["adjudicated_rows"],
-                    "refuses_fake",
-                ),
-                _curve_line_rows(
-                    f"LLM {label}",
-                    calibrated_run_state[alias]["adjudicated_rows"],
-                    "fake_substantive",
-                ),
-                _curve_line_rows(
-                    f"LLM {label}",
-                    calibrated_run_state[alias]["adjudicated_rows"],
-                    "answers_real",
-                ),
-            ]
-        )
     lines.extend(
         [
             "",
@@ -819,11 +538,6 @@ def write_report(
             f"PYTHONPATH=src python3 scripts/eval_reward_model.py --config {config_dir / 'reward_model.yaml'}",
             f"PYTHONPATH=src python3 scripts/train_tinker_rl.py --config {config_dir / 'tinker_rl_gaussian.yaml'}",
             f"PYTHONPATH=src python3 scripts/train_tinker_rl.py --config {config_dir / 'tinker_rl_raw.yaml'}",
-            f"PYTHONPATH=src python3 scripts/calibrate_reward_model.py --config {config_dir / 'calibrate_reward_model.yaml'}",
-            f"PYTHONPATH=src python3 scripts/audit_reward_transforms.py --config {config_dir / 'reward_transform_audit_calibrated.yaml'}",
-            f"PYTHONPATH=src python3 scripts/audit_kalomaze_on_policy_reward_grid.py --config {config_dir / 'on_policy_reward_grid.yaml'}",
-            f"PYTHONPATH=src python3 scripts/train_tinker_rl.py --config {config_dir / 'tinker_rl_per_class_gaussian_calibrated.yaml'}",
-            f"PYTHONPATH=src python3 scripts/train_tinker_rl.py --config {config_dir / 'tinker_rl_raw_calibrated.yaml'}",
             f"PYTHONPATH=src python3 scripts/adjudicate_kalomaze_heldout.py --output-root {root}",
             f"PYTHONPATH=src python3 scripts/write_kalomaze_replica_report.py --output-root {root} --report-path {root / 'report.md'}",
             "```",

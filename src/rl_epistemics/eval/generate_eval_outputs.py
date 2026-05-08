@@ -109,9 +109,7 @@ def eval_policy(config: dict[str, Any]) -> dict[str, Any]:
         completion = generate_completion(model, tokenizer, row["prompt"], config)
         record = {**row, "completion": completion}
         if scorer is not None:
-            record["reward"] = scorer.score(
-                row["prompt"], completion, prompt_type=row.get("prompt_type")
-            )
+            record["reward"] = scorer.score(row["prompt"], completion)
         rows.append(record)
 
     classified = maybe_judge_rows(classify_rows(rows), config)

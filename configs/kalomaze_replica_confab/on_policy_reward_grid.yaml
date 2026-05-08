@@ -1,15 +1,11 @@
 dataset_path: data/kalomaze_replica_confab/pairs.jsonl
 output_root: outputs/kalomaze_replica_confab
-reward_model_dirs:
-  - outputs/kalomaze_replica_confab/reward_model
-  - outputs/kalomaze_replica_confab/reward_model_calibrated
+reward_model_dir: outputs/kalomaze_replica_confab/reward_model_calibrated
 output_dir: outputs/kalomaze_replica_confab/report/reward_grid
 split: test
 runs:
   - gaussian
   - raw
-  - per_class_gaussian_calibrated
-  - raw_calibrated
 steps: latest
 prompt_types:
   - fake
