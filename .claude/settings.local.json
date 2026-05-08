@@ -3,7 +3,10 @@
     "allow": [
       "Bash(python3 -m pytest -q tests/test_rm_ablation.py tests/test_reward_calibration.py tests/test_reward_transforms.py tests/test_kalomaze_on_policy_reward_audit.py tests/test_reward_transform_audit.py tests/test_kalomaze_replica.py tests/test_kalomaze_adjudication.py tests/test_tinker_quality_gate.py)",
       "Bash(python3 -m pytest -q tests/test_kalomaze_replica.py tests/test_kalomaze_adjudication.py)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)"
     ]
   }
 }
